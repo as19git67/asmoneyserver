@@ -1,0 +1,30 @@
+{
+  "name": "asmoneyserver",
+  "version": "1.0.0",
+  "description": "The server for a multibanking app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./bin/www",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/as19git67/asmoneyserver.git"
+  },
+  "keywords": [
+    "banking",
+    "multibanking"
+  ],
+  "author": "Anton Schegg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/as19git67/asmoneyserver/issues"
+  },
+  "homepage": "https://github.com/as19git67/asmoneyserver#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "debug": "^4.3.3",
+    "express": "^4.17.2",
+    "http-errors": "^2.0.0"
+  }
+}
