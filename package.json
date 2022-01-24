@@ -1,5 +1,5 @@
 {
-  "name": "asmoneyserver",
+  "name": "finanzkraftserver",
   "version": "1.0.0",
   "description": "The server for a multibanking app",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/as19git67/asmoneyserver.git"
+    "url": "git+https://github.com/as19git67/finanzkraftserver.git"
   },
   "keywords": [
     "banking",
@@ -18,13 +18,27 @@
   "author": "Anton Schegg",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/as19git67/asmoneyserver/issues"
+    "url": "https://github.com/as19git67/finanzkraftserver/issues"
   },
-  "homepage": "https://github.com/as19git67/asmoneyserver#readme",
+  "homepage": "https://github.com/as19git67/finanzkraftserver#readme",
   "dependencies": {
     "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "debug": "^4.3.3",
     "express": "^4.17.2",
-    "http-errors": "^2.0.0"
+    "express-session": "^1.17.2",
+    "hat": "0.0.3",
+    "hbs": "^4.2.0",
+    "http-errors": "^2.0.0",
+    "jsonfile": "^6.1.0",
+    "knex": "^1.0.1",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "morgan": "^1.10.0",
+    "mssql": "^7.3.0",
+    "nconf": "^0.11.3",
+    "passport": "^0.5.2",
+    "passport-http": "^0.3.0",
+    "passport-http-bearer": "^1.0.1"
   }
 }
