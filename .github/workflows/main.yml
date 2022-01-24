@@ -35,7 +35,8 @@ jobs:
               cd finanzkraftserver
             else
               cd finanzkraftserver
-              git pull --rebase
+              git checkout package-lock.json
+              git pull --rebase --ff-only -X theirs
             fi
             npm install
         
