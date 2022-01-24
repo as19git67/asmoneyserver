@@ -32,7 +32,10 @@ jobs:
           script: |
             if [ ! -d finanzkraftserver ]; then
               git clone git@github.com:as19git67/finanzkraftserver.git || exit 1
+              cd finanzkraftserver
+            else
+              cd finanzkraftserver
+              git pull --rebase
             fi
-            cd finanzkraftserver
             npm install
         
