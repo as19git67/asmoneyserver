@@ -1,0 +1,22 @@
+# copy to /etc/systemd/system
+# systemctl enable finanzkraftserver
+# systemctl start finanzkraftserver
+[Unit]
+Description=Finanzkraft Web Site
+Wants=network.target
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /home/fk/finanzkraftserver/server.js
+WorkingDirectory=/home/fk/finanzkraftserver
+Restart=on-failure
+#Restart=always
+#StandardOutput=/var/log/finanzkraftserver.log
+#StandardError=/var/log/finanzkraftserver.log
+SyslogIdentifier=finanzkraftserver
+User=fk
+Group=fk
+Environment=NODE_ENV=development
+
+[Install]
+WantedBy=multi-user.target
