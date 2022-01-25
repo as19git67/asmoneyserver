@@ -39,4 +39,6 @@ jobs:
               git pull --rebase --ff-only -X theirs
             fi
             npm install
+            sudo systemctl restart finanzkraftserver.service
+            
         
