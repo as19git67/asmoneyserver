@@ -25,6 +25,7 @@ class DB {
         database: dbname,
         options: {
           encrypt: true,
+          trustServerCertificate: true,
           requestTimeout: 30000
         }
       },
