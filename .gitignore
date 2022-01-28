@@ -1,4 +1,6 @@
 .idea
+settings.json
+
 # Logs
 logs
 *.log
