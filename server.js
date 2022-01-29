@@ -49,10 +49,11 @@ app.doInitialConfig().then(() => {
       server.on('error', onError);
       server.on('listening', onListening);
     }
-  }).catch(ex => {
+  }
+}).catch(ex => {
     console.log("initial config failed");
     console.log(ex);
-  });
+});
 
 /**
  * Normalize a port into a number, string, or false.
