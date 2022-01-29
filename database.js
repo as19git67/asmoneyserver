@@ -37,7 +37,7 @@ class DB {
   }
 
   async isSchemaOK() {
-    const table = 'Users';
+    const table = 'Transactions';
     return await this._existsTable(table);
   }
 
@@ -51,7 +51,7 @@ class DB {
 
     // CREATE TABLES
 
-    const tableName = 'Users';
+    let tableName = 'Users';
     try {
       await this.knex.schema.createTable(tableName, function (t) {
           t.increments('id').primary();
@@ -61,16 +61,9 @@ class DB {
           t.string('initials', 2);
       });
       console.log("Table " + tableName + " created");
-    }
-    catch(ex) {
-      console.log("creating table " + tableName + " failed");
-      console.log(ex);
-      throw ex;
-    }  
 
-    await new Promise(async (resolve, reject) => {
-      const tableName = 'UsersAccessTokens';
-      this.knex.schema.createTable(tableName, function (t) {
+      tableName = 'UsersAccessTokens';
+      await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.integer('idUser').notNullable().references('id').inTable('Users').index();
         t.string('client').notNullable().index();
@@ -78,55 +71,28 @@ class DB {
         t.string('refreshToken').notNullable().index();
         t.integer('expiresIn').notNullable();
         t.dateTime('expiredAfter').notNullable().index();
-      })
-      .then(function () {
-        console.log("Table " + tableName + " created");
-        resolve();
-      })
-      .catch(function (err) {
-        console.log("creating table " + tableName + " failed");
-        reject(err);
       });
-    });
+      console.log("Table " + tableName + " created");
 
-    await new Promise(async (resolve, reject) => {
-      const tableName = 'FinTsContacts';
-      this.knex.schema.createTable(tableName, function (t) {
+      tableName = 'FinTsContacts';
+      await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.string('Name').unique().notNullable();
-      })
-      .then(function () {
-        console.log("Table " + tableName + " created");
-        resolve();
-      })
-      .catch(function (err) {
-        console.log("creating table " + tableName + " failed");
-        reject(err);
       });
-    });
+      console.log("Table " + tableName + " created");
 
-    await this._switchSystemVersioningOn('FinTsContacts');
+      await this._switchSystemVersioningOn('FinTsContacts');
 
-    await new Promise(async (resolve, reject) => {
-      const tableName = 'NewAccounts';
-      this.knex.schema.createTable(tableName, function (t) {
+      tableName = 'Accounts';
+      await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.string('name').notNullable().index();
-      })
-      .then(function () {
-        console.log("Table " + tableName + " created");
-        resolve();
-      })
-      .catch(function (err) {
-        console.log("creating table " + tableName + " failed");
-        reject(err);
       });
-    });
-    await this._switchSystemVersioningOn('NewAccounts');
+      console.log("Table " + tableName + " created");
+      await this._switchSystemVersioningOn(tableName);
 
-    await new Promise(async (resolve, reject) => {
-      const tableName = 'NewTransactions';
-      this.knex.schema.createTable(tableName, function (t) {
+      tableName = 'Transactions';
+      await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
 
         t.string('OwnrAcctCcy').notNullable();
@@ -166,19 +132,17 @@ class DB {
         t.string('BtchBookg').index();
         t.string('BtchId').index();
         t.string('RmtdUltmtNm').index();
-        t.integer('idAccount').notNullable().references('id').inTable('NewAccounts').index();
+                t.integer('idAccount').notNullable().references('id').inTable('Accounts').index();
         t.dateTime('transactionDate', false);   // = Buchungsdatum;  false means database does store timezone
-      })
-      .then(function () {
-        console.log("Table " + tableName + " created");
-        resolve();
-      })
-      .catch(function (err) {
-        console.log("creating table " + tableName + " failed");
-        reject(err);
       });
-    });
-    await this._switchSystemVersioningOn('NewTransactions');
+      console.log("Table " + tableName + " created");
+      await this._switchSystemVersioningOn(tableName);
+    }
+    catch(ex) {
+      console.log("creating table " + tableName + " failed");
+      console.log(ex);
+      throw ex;
+    }  
   }
 
   async _existsTable(table, callback) {
