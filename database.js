@@ -51,28 +51,27 @@ class DB {
 
     // CREATE TABLES
 
-    await new Promise(async (resolve, reject) => {
-      const tableName = 'Users';
-      self.knex.schema.createTable(tableName, function (t) {
-        t.increments('id').primary();
-        t.string('username').unique().notNullable().index();
-        t.string('passwordSalt').notNullable();
-        t.string('passwordHash').notNullable();
-        t.string('initials', 2);
-      })
-      .then(function () {
+    const tableName = 'Users';
+    try {
+      await this.knex.schema.createTable(tableName, function (t) {
+          t.increments('id').primary();
+          t.string('username').unique().notNullable().index();
+          t.string('passwordSalt').notNullable();
+          t.string('passwordHash').notNullable();
+          t.string('initials', 2);
+        });
         console.log("Table " + tableName + " created");
-        resolve();
-      })
-      .catch(function (err) {
+      }
+      catch(function (ex) {
         console.log("creating table " + tableName + " failed");
-        reject(err);
+        console.log(ex);
+        throw ex;
       });
     });
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'UsersAccessTokens';
-      self.knex.schema.createTable(tableName, function (t) {
+      this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.integer('idUser').notNullable().references('id').inTable('Users').index();
         t.string('client').notNullable().index();
@@ -93,7 +92,7 @@ class DB {
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'FinTsContacts';
-      self.knex.schema.createTable(tableName, function (t) {
+      this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.string('Name').unique().notNullable();
       })
@@ -111,7 +110,7 @@ class DB {
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'NewAccounts';
-      self.knex.schema.createTable(tableName, function (t) {
+      this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.string('name').notNullable().index();
       })
@@ -124,11 +123,11 @@ class DB {
         reject(err);
       });
     });
-    await self._switchSystemVersioningOn('NewAccounts');
+    await this._switchSystemVersioningOn('NewAccounts');
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'NewTransactions';
-      self.knex.schema.createTable(tableName, function (t) {
+      this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
 
         t.string('OwnrAcctCcy').notNullable();
