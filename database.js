@@ -59,15 +59,14 @@ class DB {
           t.string('passwordSalt').notNullable();
           t.string('passwordHash').notNullable();
           t.string('initials', 2);
-        });
-        console.log("Table " + tableName + " created");
-      }
-      catch(function (ex) {
-        console.log("creating table " + tableName + " failed");
-        console.log(ex);
-        throw ex;
       });
-    });
+      console.log("Table " + tableName + " created");
+    }
+    catch(ex) {
+      console.log("creating table " + tableName + " failed");
+      console.log(ex);
+      throw ex;
+    }  
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'UsersAccessTokens';
