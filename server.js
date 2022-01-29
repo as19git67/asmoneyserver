@@ -11,48 +11,48 @@ const path = require('path');
 let server;
 let port;
 
-app.doInitialConfig(function (err) {
-  if (!err) {
-    port = config.get('httpsPort');
+app.doInitialConfig().then(() => {
+  port = config.get('httpsPort');
 
+  if (port) {
+    app.set('port', port);
+    try {
+      const secureOptions = {
+        key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
+        cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem'))
+      };
+      // Create HTTPS server
+      server = https.createServer(secureOptions, app);
+
+      // Listen on provided port, on all network interfaces.
+      server.listen(port, function () {
+        console.log('Finanzkraft https server listening on port ' + port);
+      });
+      server.on('error', onError);
+      server.on('listening', onListening);
+    } catch (e) {
+      console.log("EXCEPTION while creating the https server:", e);
+    }
+  } else {
+    // no https -> try http
+    port = process.env.PORT || config.get('httpPort');
+    //const httpPort = normalizePort(process.env.PORT || '3000');
     if (port) {
       app.set('port', port);
-      try {
-        const secureOptions = {
-          key: fs.readFileSync(path.resolve(__dirname, 'key.pem')),
-          cert: fs.readFileSync(path.resolve(__dirname, 'cert.pem'))
-        };
-        // Create HTTPS server
-        server = https.createServer(secureOptions, app);
+      // Create HTTP server
+      server = http.createServer(app);
 
-        // Listen on provided port, on all network interfaces.
-        server.listen(port, function () {
-          console.log('Finanzkraft https server listening on port ' + port);
-        });
-        server.on('error', onError);
-        server.on('listening', onListening);
-      } catch (e) {
-        console.log("EXCEPTION while creating the https server:", e);
-      }
-    } else {
-      // no https -> try http
-      port = process.env.PORT || config.get('httpPort');
-      //const httpPort = normalizePort(process.env.PORT || '3000');
-      if (port) {
-        app.set('port', port);
-        // Create HTTP server
-        server = http.createServer(app);
-
-        // Listen on provided port, on all network interfaces.
-        server.listen(port, function () {
-          console.log('Finanzkraft http server listening on port ' + port);
-        });
-        server.on('error', onError);
-        server.on('listening', onListening);
-      }
+      // Listen on provided port, on all network interfaces.
+      server.listen(port, function () {
+        console.log('Finanzkraft http server listening on port ' + port);
+      });
+      server.on('error', onError);
+      server.on('listening', onListening);
     }
-  }
-});
+  }).catch(ex => {
+    console.log("initial config failed");
+    console.log(ex);
+  });
 
 /**
  * Normalize a port into a number, string, or false.

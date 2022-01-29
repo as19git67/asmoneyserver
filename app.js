@@ -50,8 +50,8 @@ app.use(function(err, req, res, next) {
 
 passportStrategies.init(passport);
 
-app.doInitialConfig = function(callback) {
-  InitialConfig(app, callback);
+app.doInitialConfig = async function(callback) {
+  await InitialConfig(app);
 };
 
 module.exports = app;
