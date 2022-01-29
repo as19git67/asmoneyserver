@@ -105,7 +105,7 @@ class DB {
       });
     });
 
-    await self._switchSystemVersioningOn('FinTsContacts');
+    await this._switchSystemVersioningOn('FinTsContacts');
 
     await new Promise(async (resolve, reject) => {
       const tableName = 'NewAccounts';
