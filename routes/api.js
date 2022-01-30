@@ -8,6 +8,40 @@ const config = require('../config');
 const Users = require('../Users');
 const Hat = require('hat');
 
+/* POST (add) transactions */
+router.post('/devices', CORS(), ( (req, res, next) => {
+  if (!_.isObject(req.body)) {
+    res.status(404).send('request body must be an object');
+    return;
+  }
+  if (!req.body.deviceid) {
+    res.status(404).send('request body must be an object with attribute deviceid');
+    return;
+  }
+  if (!req.body.pubkey) {
+    res.status(404).send('request body must be an object with attribute pubkey');
+    return;
+  }
+  if (!req.body.privkey) {
+    res.status(404).send('request body must be an object with attribute privkey');
+    return;
+  }
+  // todo limit registrations from unwanted attackers that spam database
+  if (req.body.deviceid && req.body.pubkey && req.body.privkey) {
+    try {
+      const database = new DB();
+      const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey);
+      res.json({deviceId: savedDeviceId});
+    }
+    catch (ex) {
+      console.log("ERROR", ex);
+      res.status(500).send('Adding device in database failed');
+    }
+  } else {
+    res.status(404).send('request body must have correct parameters');
+  }
+});
+
 function authenticate(req, res, next) {
   // check for bearer authentication header with token
   let token = '';

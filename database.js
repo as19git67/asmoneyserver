@@ -37,8 +37,7 @@ class DB {
   }
 
   async isSchemaOK() {
-    const table = 'Transactions';
-    return await this._existsTable(table);
+    return await this._existsTable('Devices');
   }
 
   async makeSchemaUpToDate() {
@@ -47,12 +46,21 @@ class DB {
 
   async _createTables() {
     console.log('Creating database tables...');
-    await this._dropall(['UsersAccessTokens', 'Users', 'NewTransactions', 'NewAccounts', 'FinTsContacts']);
+    await this._dropall(['UsersAccessTokens', 'Users', 'Transactions', 'Accounts', 'FinTsContacts']);
 
     // CREATE TABLES
 
-    let tableName = 'Users';
     try {
+      let tableName = 'Devices';
+      await this.knex.schema.createTable(tableName, function (t) {
+          t.increments('id').primary();
+          t.string('uuid').unique().notNullable().index();
+          t.string('pubkey').notNullable();
+          t.string('privkey').notNullable();
+      });
+      console.log("Table " + tableName + " created");
+    
+      tableName = 'Users';
       await this.knex.schema.createTable(tableName, function (t) {
           t.increments('id').primary();
           t.string('username').unique().notNullable().index();
