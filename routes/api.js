@@ -9,7 +9,7 @@ const Users = require('../Users');
 const Hat = require('hat');
 
 /* POST (add) transactions */
-router.post('/devices', CORS(), ( (req, res, next) => {
+router.post('/devices', CORS(), ( async (req, res, next) => {
   if (!_.isObject(req.body)) {
     res.status(404).send('request body must be an object');
     return;
