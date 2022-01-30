@@ -9,7 +9,7 @@ const Users = require('../Users');
 const Hat = require('hat');
 
 /* POST (add) transactions */
-router.post('/devices', CORS(), ( async (req, res, next) => {
+router.post('/devices', CORS(), function (req, res, next) {
   if (!_.isObject(req.body)) {
     res.status(404).send('request body must be an object');
     return;
@@ -28,15 +28,21 @@ router.post('/devices', CORS(), ( async (req, res, next) => {
   }
   // todo limit registrations from unwanted attackers that spam database
   if (req.body.deviceid && req.body.pubkey && req.body.privkey) {
-    try {
-      const database = new DB();
-      const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey);
+    new Promise(async (resolve, reject) => {
+      try {
+        const database = new DB();
+        const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey);
+        resolve(savedDeviceId);
+      }
+      catch (ex) {
+        console.log("ERROR", ex);
+        reject(ex);
+      }
+    }).then(savedDeviceId => {
       res.json({deviceId: savedDeviceId});
-    }
-    catch (ex) {
-      console.log("ERROR", ex);
+    }).catch(reason => {
       res.status(500).send('Adding device in database failed');
-    }
+    });
   } else {
     res.status(404).send('request body must have correct parameters');
   }
