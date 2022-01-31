@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/as19git67/finanzkraftserver#readme",
   "dependencies": {
+    "axios": "^0.25.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "debug": "^4.3.3",
@@ -35,7 +36,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "morgan": "^1.10.0",
-    "mssql": "^7.3.0",
+    "mssql": "^8.0.1",
     "nconf": "^0.11.3",
     "passport": "^0.5.2",
     "passport-http": "^0.3.0",
