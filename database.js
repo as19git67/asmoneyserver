@@ -47,7 +47,7 @@ class DB {
   async addDevice(deviceId, pubkey, privKey, registration) {
     const result = await knex('Devices').insert(
           {
-            deviceid: deviceId
+            deviceid: deviceId,
             pubkey: pubkey,
             privkey: privkey,
             registration: registration.toDate(),
