@@ -37,16 +37,29 @@ class DB {
   }
 
   async isSchemaOK() {
-    return await this._existsTable('Devices');
+    return await this._existsTable('XXX');
   }
 
   async makeSchemaUpToDate() {
     return await this._createTables();
   }
 
+  async addDevice(deviceId, pubkey, privKey, registration) {
+    const result = await knex('Devices').insert(
+          {
+            deviceid: deviceId
+            pubkey: pubkey,
+            privkey: privkey,
+            registration: registration.toDate(),
+          }).returning('id');
+
+    const id = result[0];
+    return id;
+  }
+   
   async _createTables() {
     console.log('Creating database tables...');
-    await this._dropall(['UsersAccessTokens', 'Users', 'Transactions', 'Accounts', 'FinTsContacts']);
+    await this._dropall(['Devices', 'UsersAccessTokens', 'Users', 'Transactions', 'Accounts', 'FinTsContacts']);
 
     // CREATE TABLES
 
@@ -54,9 +67,10 @@ class DB {
       let tableName = 'Devices';
       await this.knex.schema.createTable(tableName, function (t) {
           t.increments('id').primary();
-          t.string('uuid').unique().notNullable().index();
-          t.string('pubkey').notNullable();
-          t.string('privkey').notNullable();
+          t.string('deviceid').unique().notNullable().index();
+          t.dateTime('registration').notNullable().index();
+          t.string('pubkey').unique().notNullable();
+          t.string('privkey').unique().notNullable();
       });
       console.log("Table " + tableName + " created");
     

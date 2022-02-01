@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 const _ = require('lodash');
+const moment = require('moment');
 const CORS = require('cors');
 const DB = require('../database');
 const config = require('../config');
@@ -31,7 +32,7 @@ router.post('/devices', CORS(), function (req, res, next) {
     new Promise(async (resolve, reject) => {
       try {
         const database = new DB();
-        const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey);
+        const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey, moment());
         resolve(savedDeviceId);
       }
       catch (ex) {
