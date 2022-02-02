@@ -70,7 +70,7 @@ class DB {
           t.string('deviceid').unique().notNullable().index();
           t.dateTime('registration').notNullable().index();
           t.string('pubkey', 2048).unique().notNullable();
-          t.string('privkey').unique().notNullable();
+          t.string('privkey', 512).unique().notNullable();
       });
       console.log("Table " + tableName + " created");
     

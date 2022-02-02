@@ -49,6 +49,7 @@ async function createNewKeyPair() {
             // // encrypt the encryption key with pwHash
             // const aesKeySecured = _encrypt(aesKeyAsBase64, pwHash, iv);
             //console.log(`pubkey: ${publicKey}, privkey: ${privateKey}`);
+            console.log(`pubkey: ${publicKey.length}, privkey: ${privateKey.length}`);
             resolve({pubkey: publicKey, privkey: privateKey});
       });
     });
