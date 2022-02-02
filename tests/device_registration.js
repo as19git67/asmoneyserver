@@ -14,7 +14,9 @@ async function register(fkApiBaseUrl, deviceId, pubkey, privkey) {
     let savedDeviceId = response.data;
     return savedDeviceId;
   } catch (ex) {
-    console.log(`ERROR while sending device registration to finanzkraft server: ${ex.response.status} ${ex.response.statusText}`);
+    if (ex.response) {
+      console.log(`ERROR while sending device registration to finanzkraft server: ${ex.response.status} ${ex.response.statusText}`);
+    }
     throw ex;
   }
 }
