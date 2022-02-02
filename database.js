@@ -44,7 +44,7 @@ class DB {
     return await this._createTables();
   }
 
-  async addDevice(deviceId, pubkey, privKey, registration) {
+  async addDevice(deviceId, pubkey, privkey, registration) {
     const result = await this.knex('Devices').insert(
           {
             deviceid: deviceId,
