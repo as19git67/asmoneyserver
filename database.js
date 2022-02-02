@@ -69,8 +69,8 @@ class DB {
           t.increments('id').primary();
           t.string('deviceid').unique().notNullable().index();
           t.dateTime('registration').notNullable().index();
-          t.string('pubkey', 1000).unique().notNullable();
-          t.string('privkey', 4000).unique().notNullable();
+          t.string('pubkey', 1000).notNullable();
+          t.string('privkey', 4000).notNullable();
       });
       console.log("Table " + tableName + " created");
     
