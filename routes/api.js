@@ -32,7 +32,7 @@ router.post('/devices', CORS(), function (req, res, next) {
     new Promise(async (resolve, reject) => {
       try {
         const database = new DB();
-        const savedDeviceId = await database.addDevice(deviceId, pubkey, privKey, moment());
+        const savedDeviceId = await database.addDevice(req.body.deviceid, req.body.pubkey, req.body.privkey, moment());
         resolve(savedDeviceId);
       }
       catch (ex) {
