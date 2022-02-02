@@ -1,8 +1,8 @@
-import Axios from "axios";
-import { v4 as uuidv4 } from 'uuid';
+const Axios = require("axios");
+const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 
-const fkApiBaseUrl = 'http://localhost:3000/api/devices';
+const fkApiBaseUrl = 'http://localhost:3000/api';
 
 
 async function register(fkApiBaseUrl, deviceId, pubkey, privkey) {
@@ -23,7 +23,7 @@ async function register(fkApiBaseUrl, deviceId, pubkey, privkey) {
 
 async function createNewKeyPair() {
   try {
-    await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
     // create new RSA keypair
       crypto.generateKeyPair('rsa', {
             modulusLength: 4096,
@@ -35,7 +35,7 @@ async function createNewKeyPair() {
               type: 'pkcs8',
               format: 'pem',
               cipher: 'aes-256-cbc',
-              passphrase: undefined
+              passphrase: ''
             }
           }, async (err, publicKey, privateKey) => {
             if (err) {
@@ -48,7 +48,7 @@ async function createNewKeyPair() {
             // const aesKeyAsBase64 = crypto.randomBytes(32).toString('base64');
             // // encrypt the encryption key with pwHash
             // const aesKeySecured = _encrypt(aesKeyAsBase64, pwHash, iv);
-
+            //console.log(`pubkey: ${publicKey}, privkey: ${privateKey}`);
             resolve({pubkey: publicKey, privkey: privateKey});
       });
     });
@@ -58,13 +58,19 @@ async function createNewKeyPair() {
   }
 }
 
-const key = await createNewKeyPair();
+new Promise(async (resolve, reject) => {
+  try {
+    const key = await createNewKeyPair();
 
-register(fkApiBaseUrl, uuidv4(), key.pubkey, key.privkey)
-  .then(() => {
+    await register(fkApiBaseUrl, uuidv4(), key.pubkey, key.privkey);
+    resolve();
+  }
+  catch(ex) {
+    reject(ex);
+  }
+}).then(() => {
     console.log("Test was successful");
-  })
-  .catch((reason) => {
+}).catch((reason) => {
     console.log("Test failed");
     console.log(reason);
-  });
+});
