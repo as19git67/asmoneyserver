@@ -9,7 +9,7 @@ const config = require('../config');
 const Users = require('../Users');
 const Hat = require('hat');
 
-/* POST (add) transactions */
+/* POST: add/register a device */
 router.post('/devices', CORS(), function (req, res, next) {
   if (!_.isObject(req.body)) {
     res.status(404).send('request body must be an object');
@@ -32,6 +32,7 @@ router.post('/devices', CORS(), function (req, res, next) {
     new Promise(async (resolve, reject) => {
       try {
         const database = new DB();
+        // todo: don't save private key in database - keep it only in memory
         const savedDeviceId = await database.addDevice(req.body.deviceid, req.body.pubkey, req.body.privkey, moment());
         resolve(savedDeviceId);
       }
@@ -43,6 +44,47 @@ router.post('/devices', CORS(), function (req, res, next) {
       res.json({deviceId: savedDeviceId});
     }).catch(reason => {
       res.status(500).send('Adding device in database failed');
+    });
+  } else {
+    res.status(404).send('request body must have correct parameters');
+  }
+});
+
+/* POST: setup a new account for a device */
+router.post('/accounts', CORS(), function (req, res, next) {
+  if (!_.isObject(req.body)) {
+    res.status(404).send('request body must be an object');
+    return;
+  }
+  if (!req.body.deviceid) {
+    res.status(404).send('request body must be an object with attribute deviceid');
+    return;
+  }
+  if (!req.body.iban) {
+    res.status(404).send('request body must be an object with attribute iban');
+    return;
+  }
+  if (!req.body.bankcontact) {
+    res.status(404).send('request body must be an object with attribute bankcontact');
+    return;
+  }
+  if (req.body.deviceid && req.body.deviceid && req.body.iban && req.body.bankcontact) {
+    // todo: check if user and password could be decrypted (prove that it's encrypted)
+
+    new Promise(async (resolve, reject) => {
+      try {
+        const database = new DB();
+        // note: user and password are not decrypted when stored in database
+        const savedAccountId = await database.addAccount(req.body.deviceid, req.body.iban, req.body.bankcontact, moment());
+        resolve(savedAccountId);
+      } catch (ex) {
+        console.log("ERROR", ex);
+        reject(ex);
+      }
+    }).then(savedAccountId => {
+      res.json({accountId: savedAccountId});
+    }).catch(reason => {
+      res.status(500).send('Adding account in database failed');
     });
   } else {
     res.status(404).send('request body must have correct parameters');
