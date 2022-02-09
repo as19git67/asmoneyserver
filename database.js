@@ -44,43 +44,90 @@ class DB {
     return await this._createTables();
   }
 
-  async addDevice(deviceId, pubkey, privkey, registration) {
+  async addDevice(deviceId, publicKey, registration) {
     const result = await this.knex('Devices').insert(
-          {
-            deviceid: deviceId,
-            pubkey: pubkey,
-            privkey: privkey,
-            registration: registration.toDate(),
-          }).returning('id');
+      {
+        deviceid: deviceId,
+        pubkey: publicKey,
+        registration: registration.toDate(),
+      }).returning('id');
 
     const id = result[0];
     return id;
   }
-   
+
+  async getDeviceData(deviceId) {
+    const result = await this.knex.select().table('Devices')
+    .where({
+      deviceid: deviceId,
+    });
+    if (result.length === 1) {
+      const deviceInfo = result[0];
+      return {
+        deviceId: deviceInfo.deviceId,
+        publicKey: deviceInfo.pubkey,
+        registration: deviceInfo.registration
+      };
+    } else {
+      return undefined;
+    }
+  }
+
+  async addAccount(deviceId, iban, bankContact, creation) {
+    // todo: lookup bankaccounts of this user and reuse it if used for another account with same bankcontact
+    const result = await this.knex('Accounts').insert(
+      {
+        deviceid: deviceId,
+        iban: iban,
+        contacttype: bankContact.type,
+        contactbic: bankContact.bic,
+        contacturl: bankContact.url,
+        contactusernameenc: bankContact.username_enc,
+        contactpasswordenc: bankContact.password_enc,
+        creation: creation.toDate(),
+      }).returning('id');
+
+    const id = result[0];
+    return id;
+  }
+
   async _createTables() {
     console.log('Creating database tables...');
-    await this._dropall(['Devices', 'UsersAccessTokens', 'Users', 'Transactions', 'Accounts', 'FinTsContacts']);
+    await this._dropall(['Devices', 'Accounts', 'UsersAccessTokens', 'Users', 'Transactions', 'FinTsContacts']);
 
     // CREATE TABLES
 
     try {
       let tableName = 'Devices';
       await this.knex.schema.createTable(tableName, function (t) {
-          t.increments('id').primary();
-          t.string('deviceid').unique().notNullable().index();
-          t.dateTime('registration').notNullable().index();
-          t.string('pubkey', 1000).notNullable();
-          t.string('privkey', 4000).notNullable();
+        t.increments('id').primary();
+        t.string('deviceid').unique().notNullable().index();
+        t.dateTime('registration').notNullable().index();
+        t.string('pubkey', 1000).notNullable();
       });
       console.log("Table " + tableName + " created");
-    
+
+      tableName = 'Accounts';
+      await this.knex.schema.createTable(tableName, function (t) {
+        t.increments('id').primary();
+        t.string('deviceid').notNullable().index();
+        t.string('iban').notNullable().index();
+        t.string('contacttype').notNullable();
+        t.string('contactbic').notNullable().index();
+        t.string('contacturl').notNullable().index();
+        t.string('contactusernameenc').notNullable();
+        t.string('contactpasswordenc').notNullable();
+        t.dateTime('creation').notNullable().index();
+      });
+      console.log("Table " + tableName + " created");
+
       tableName = 'Users';
       await this.knex.schema.createTable(tableName, function (t) {
-          t.increments('id').primary();
-          t.string('username').unique().notNullable().index();
-          t.string('passwordSalt').notNullable();
-          t.string('passwordHash').notNullable();
-          t.string('initials', 2);
+        t.increments('id').primary();
+        t.string('username').unique().notNullable().index();
+        t.string('passwordSalt').notNullable();
+        t.string('passwordHash').notNullable();
+        t.string('initials', 2);
       });
       console.log("Table " + tableName + " created");
 
@@ -104,14 +151,6 @@ class DB {
       console.log("Table " + tableName + " created");
 
       await this._switchSystemVersioningOn('FinTsContacts');
-
-      tableName = 'Accounts';
-      await this.knex.schema.createTable(tableName, function (t) {
-        t.increments('id').primary();
-        t.string('name').notNullable().index();
-      });
-      console.log("Table " + tableName + " created");
-      await this._switchSystemVersioningOn(tableName);
 
       tableName = 'Transactions';
       await this.knex.schema.createTable(tableName, function (t) {
@@ -154,17 +193,16 @@ class DB {
         t.string('BtchBookg').index();
         t.string('BtchId').index();
         t.string('RmtdUltmtNm').index();
-                t.integer('idAccount').notNullable().references('id').inTable('Accounts').index();
+        t.integer('idAccount').notNullable().references('id').inTable('Accounts').index();
         t.dateTime('transactionDate', false);   // = Buchungsdatum;  false means database does store timezone
       });
       console.log("Table " + tableName + " created");
       await this._switchSystemVersioningOn(tableName);
-    }
-    catch(ex) {
+    } catch (ex) {
       console.log("creating table " + tableName + " failed");
       console.log(ex);
       throw ex;
-    }  
+    }
   }
 
   async _existsTable(table, callback) {

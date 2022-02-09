@@ -8,6 +8,14 @@ const DB = require('../database');
 const config = require('../config');
 const Users = require('../Users');
 const Hat = require('hat');
+const ibantools = require('ibantools');
+
+// ### Security Konzept ###
+// client hat private und public key
+// server hat public key in DB und private key im RAM
+// client sendet Anfrage mit deviceId signiert mittels private key
+// server prüft deviceId mittels public key => deviceId ok, wenn signature ok
+// server benutzt private key von deviceId zum entschlüsseln der Konto-Login Daten
 
 /* POST: add/register a device */
 router.post('/devices', CORS(), function (req, res, next) {
@@ -32,8 +40,15 @@ router.post('/devices', CORS(), function (req, res, next) {
     new Promise(async (resolve, reject) => {
       try {
         const database = new DB();
-        // todo: don't save private key in database - keep it only in memory
-        const savedDeviceId = await database.addDevice(req.body.deviceid, req.body.pubkey, req.body.privkey, moment());
+        const now = moment();
+        const savedDeviceId = await database.addDevice(req.body.deviceid, req.body.pubkey, now);
+        // private key is stored only in memory
+        let devices = req.app.get('knownDevices');
+        if (!devices) {
+          devices = [];
+          req.app.set('knownDevices', devices);
+        }
+        devices[savedDeviceId] = {privkey: req.body.privkey, registration: now};
         resolve(savedDeviceId);
       }
       catch (ex) {
@@ -60,29 +75,76 @@ router.post('/accounts', CORS(), function (req, res, next) {
     res.status(404).send('request body must be an object with attribute deviceid');
     return;
   }
+  if (!req.body.signature) {
+    res.status(404).send('request body must be an object with attribute signature');
+    return;
+  }
   if (!req.body.iban) {
     res.status(404).send('request body must be an object with attribute iban');
+    return;
+  }
+  if (!ibantools.isValidIBAN(req.body.iban)) {
+    res.status(404).send('iban is invalid');
     return;
   }
   if (!req.body.bankcontact) {
     res.status(404).send('request body must be an object with attribute bankcontact');
     return;
   }
+  if (!ibantools.isValidBIC(req.body.bankcontact.bic)) {
+    res.status(404).send('bic in bankcontact is invalid');
+    return;
+  }
   if (req.body.deviceid && req.body.deviceid && req.body.iban && req.body.bankcontact) {
-    // todo: check if user and password could be decrypted (prove that it's encrypted)
-
     new Promise(async (resolve, reject) => {
       try {
+        const deviceId = req.body.deviceid;
         const database = new DB();
+        const deviceInfo = await database.getDeviceData(deviceId);
+
+        // const devices = req.app.get('knownDevices');
+        // const deviceInfo = devices[deviceId];
+        // if (!deviceInfo) {
+        //   // need to request an device info update from client, which then sends again the private key
+        //   // to be stored in req.app.knownDevices
+        //   console.log(`Device info not in memory for deviceId ${deviceId}. Client needs to resend the private key.`);
+        //   resolve({ok: false, reason: 'privkey'});
+        //   return;
+        // }
+        const data = Buffer.from(deviceId);
+        const isVerified = crypto.verify("SHA256", data, deviceInfo.publicKey, req.body.signature);
+        if (!isVerified) {
+          // need to request an device info update from client, which then sends again the private key
+          // to be stored in req.app.knownDevices
+          console.log(`Signature verification for deviceId ${deviceId} failed`);
+          resolve({ok: false, reason: 'signature'});
+          return;
+        }
+
+        let bankContact = {
+          type: req.body.bankcontact.type,
+          bic: req.body.bankcontact.bic,
+          url: req.body.bankcontact.url,
+          username_enc: req.body.bankcontact.username_enc,
+          password_enc: req.body.bankcontact.password_enc,
+        };
+
         // note: user and password are not decrypted when stored in database
-        const savedAccountId = await database.addAccount(req.body.deviceid, req.body.iban, req.body.bankcontact, moment());
-        resolve(savedAccountId);
+        const savedAccountId = await database.addAccount(req.body.deviceid, req.body.iban, bankContact, moment());
+        resolve({ok: true, savedAccountId: savedAccountId});
       } catch (ex) {
         console.log("ERROR", ex);
         reject(ex);
       }
-    }).then(savedAccountId => {
-      res.json({accountId: savedAccountId});
+    }).then(result => {
+      if (result.ok) {
+        res.json({accountId: result.savedAccountId});
+      } else {
+        switch (result.reason) {
+          default:
+            res.status(401).end();  // unauthorized
+        }
+      }
     }).catch(reason => {
       res.status(500).send('Adding account in database failed');
     });
@@ -90,6 +152,9 @@ router.post('/accounts', CORS(), function (req, res, next) {
     res.status(404).send('request body must have correct parameters');
   }
 });
+
+// ### alter code ###
+// todo: lösche nicht mehr benutzten Code
 
 function authenticate(req, res, next) {
   // check for bearer authentication header with token

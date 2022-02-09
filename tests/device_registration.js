@@ -59,7 +59,7 @@ async function createNewKeyPair() {
   }
 }
 
-async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKey) {
+async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKey, privateKey) {
   if (!bankContact.username) {
     throw new Error('username missing in bankContact');
   }
@@ -71,15 +71,20 @@ async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKe
 
   const url = fkApiBaseUrl + '/accounts';
 
+  // create a signature from the deviceId
+  const data = Buffer.from(deviceId);
+  const signature = crypto.sign("SHA256", data, privateKey).toString('base64');
+
   try {
     let data = {
       deviceid: deviceId,
+      signature: signature,
       iban: iban,
       bankcontact: {
         type: bankContact.type,
         url: bankContact.url,
-        username: encryptedUsername,
-        password: encryptedPassword
+        username_enc: encryptedUsername,
+        password_enc: encryptedPassword
       }
     };
     const response = await Axios.post(url, data, {headers: {'Content-Type': 'application/json'}});
