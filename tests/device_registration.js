@@ -112,7 +112,7 @@ new Promise(async (resolve, reject) => {
       username: 'abc',
       password: 'secret'
     };
-    await createAccount(fkApiBaseUrl, deviceId, iban, bankcontact, key.pubkey);
+    await createAccount(fkApiBaseUrl, deviceId, iban, bankcontact, key.pubkey, key.privkey);
     resolve();
   } catch (ex) {
     reject(ex);
