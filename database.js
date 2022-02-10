@@ -93,7 +93,7 @@ class DB {
 
   async _createTables() {
     console.log('Creating database tables...');
-    await this._dropall(['Devices', 'Accounts', 'UsersAccessTokens', 'Users', 'Transactions', 'FinTsContacts']);
+    await this._dropall(['Transactions', 'Accounts', 'Devices', 'UsersAccessTokens', 'Users', 'FinTsContacts']);
 
     // CREATE TABLES
 
@@ -110,7 +110,7 @@ class DB {
       tableName = 'Accounts';
       await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
-        t.string('deviceid').notNullable().index();
+        t.integer('deviceid').notNullable().references('id').inTable('Devices').index();
         t.string('iban').notNullable().index();
         t.string('contacttype').notNullable();
         t.string('contactbic').notNullable().index();
