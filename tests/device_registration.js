@@ -73,7 +73,10 @@ async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKe
 
   // create a signature from the deviceId
   const data = Buffer.from(deviceId);
-  const signature = crypto.sign("SHA256", data, privateKey).toString('base64');
+  const signature = crypto.sign("SHA256", data, {
+    key: privateKey.toString(),
+    passphrase: '',
+  }).toString('base64');
 
   try {
     let data = {
