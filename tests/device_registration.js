@@ -66,8 +66,8 @@ async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKe
   if (!bankContact.password) {
     throw new Error('password missing in bankContact');
   }
-  const encryptedUsername = crypto.publicEncrypt(publicKey, Buffer.from(bankContact.username));
-  const encryptedPassword = crypto.publicEncrypt(publicKey, Buffer.from(bankContact.password));
+  const encryptedUsername = crypto.publicEncrypt(publicKey, Buffer.from(bankContact.username)).toString('base64');
+  const encryptedPassword = crypto.publicEncrypt(publicKey, Buffer.from(bankContact.password)).toString('base64');
 
   const url = fkApiBaseUrl + '/accounts';
 
