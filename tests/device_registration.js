@@ -84,6 +84,7 @@ async function createAccount(fkApiBaseUrl, deviceId, iban, bankContact, publicKe
       signature: signature,
       iban: iban,
       bankcontact: {
+        bic: bankContact.bic,
         type: bankContact.type,
         url: bankContact.url,
         username_enc: encryptedUsername,
@@ -109,7 +110,10 @@ new Promise(async (resolve, reject) => {
     await register(fkApiBaseUrl, deviceId, key.pubkey, key.privkey);
 
     const iban = 'DE82720691550000544604';
+    const bic = 'GENODEF1MRI';
+
     const bankcontact = {
+      bic: bic,
       type: 'fints',
       url: 'https://hbci11.fiducia.de/cgi-bin/hbciservlet',
       username: 'abc',
@@ -124,5 +128,9 @@ new Promise(async (resolve, reject) => {
   console.log("Test was successful");
 }).catch((reason) => {
   console.log("Test failed");
-  console.log(reason);
+  if (reason.data) {
+    console.log(reason.data);
+  } else {
+    console.log(reason);
+  }
 });
