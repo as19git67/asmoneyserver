@@ -8,7 +8,8 @@ const DB = require('../database');
 const config = require('../config');
 const Users = require('../Users');
 const Hat = require('hat');
-const ibantools = require('ibantools');
+const crypto = require('crypto');
+const ibanTools = require('ibantools');
 
 // ### Security Konzept ###
 // client hat private und public key
@@ -82,7 +83,7 @@ router.post('/accounts', CORS(), function (req, res, next) {
     res.status(404).send('request body must be an object with attribute iban');
     return;
   }
-  if (!ibantools.isValidIBAN(req.body.iban)) {
+  if (!ibanTools.isValidIBAN(req.body.iban)) {
     res.status(404).send('iban is invalid');
     return;
   }
@@ -90,7 +91,7 @@ router.post('/accounts', CORS(), function (req, res, next) {
     res.status(404).send('request body must be an object with attribute bankcontact');
     return;
   }
-  if (!ibantools.isValidBIC(req.body.bankcontact.bic)) {
+  if (!ibanTools.isValidBIC(req.body.bankcontact.bic)) {
     res.status(404).send('bic in bankcontact is invalid');
     return;
   }
