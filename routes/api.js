@@ -50,8 +50,7 @@ router.post('/devices', CORS(), function (req, res, next) {
         }
         devices[savedDeviceId] = {privkey: req.body.privkey, registration: now};
         resolve(savedDeviceId);
-      }
-      catch (ex) {
+      } catch (ex) {
         console.log("ERROR", ex);
         reject(ex);
       }
@@ -95,62 +94,59 @@ router.post('/accounts', CORS(), function (req, res, next) {
     res.status(404).send('bic in bankcontact is invalid');
     return;
   }
-  if (req.body.deviceid && req.body.deviceid && req.body.iban && req.body.bankcontact) {
-    new Promise(async (resolve, reject) => {
-      try {
-        const deviceId = req.body.deviceid;
-        const database = new DB();
-        const deviceInfo = await database.getDeviceData(deviceId);
+  console.log("adding a new account...");
+  new Promise(async (resolve, reject) => {
+    try {
+      const deviceId = req.body.deviceid;
+      const database = new DB();
+      const deviceInfo = await database.getDeviceData(deviceId);
 
-        // const devices = req.app.get('knownDevices');
-        // const deviceInfo = devices[deviceId];
-        // if (!deviceInfo) {
-        //   // need to request an device info update from client, which then sends again the private key
-        //   // to be stored in req.app.knownDevices
-        //   console.log(`Device info not in memory for deviceId ${deviceId}. Client needs to resend the private key.`);
-        //   resolve({ok: false, reason: 'privkey'});
-        //   return;
-        // }
-        const data = Buffer.from(deviceId);
-        const isVerified = crypto.verify("SHA256", data, deviceInfo.publicKey, req.body.signature);
-        if (!isVerified) {
-          // need to request an device info update from client, which then sends again the private key
-          // to be stored in req.app.knownDevices
-          console.log(`Signature verification for deviceId ${deviceId} failed`);
-          resolve({ok: false, reason: 'signature'});
-          return;
-        }
-
-        let bankContact = {
-          type: req.body.bankcontact.type,
-          bic: req.body.bankcontact.bic,
-          url: req.body.bankcontact.url,
-          username_enc: req.body.bankcontact.username_enc,
-          password_enc: req.body.bankcontact.password_enc,
-        };
-
-        // note: user and password are not decrypted when stored in database
-        const savedAccountId = await database.addAccount(req.body.deviceid, req.body.iban, bankContact, moment());
-        resolve({ok: true, savedAccountId: savedAccountId});
-      } catch (ex) {
-        console.log("ERROR", ex);
-        reject(ex);
+      // const devices = req.app.get('knownDevices');
+      // const deviceInfo = devices[deviceId];
+      // if (!deviceInfo) {
+      //   // need to request an device info update from client, which then sends again the private key
+      //   // to be stored in req.app.knownDevices
+      //   console.log(`Device info not in memory for deviceId ${deviceId}. Client needs to resend the private key.`);
+      //   resolve({ok: false, reason: 'privkey'});
+      //   return;
+      // }
+      const data = Buffer.from(deviceId);
+      const isVerified = crypto.verify("SHA256", data, deviceInfo.publicKey, req.body.signature);
+      if (!isVerified) {
+        // need to request an device info update from client, which then sends again the private key
+        // to be stored in req.app.knownDevices
+        console.log(`Signature verification for deviceId ${deviceId} failed`);
+        resolve({ok: false, reason: 'signature'});
+        return;
       }
-    }).then(result => {
-      if (result.ok) {
-        res.json({accountId: result.savedAccountId});
-      } else {
-        switch (result.reason) {
-          default:
-            res.status(401).end();  // unauthorized
-        }
+
+      let bankContact = {
+        type: req.body.bankcontact.type,
+        bic: req.body.bankcontact.bic,
+        url: req.body.bankcontact.url,
+        username_enc: req.body.bankcontact.username_enc,
+        password_enc: req.body.bankcontact.password_enc,
+      };
+
+      // note: user and password are not decrypted when stored in database
+      const savedAccountId = await database.addAccount(req.body.deviceid, req.body.iban, bankContact, moment());
+      resolve({ok: true, savedAccountId: savedAccountId});
+    } catch (ex) {
+      console.log("ERROR", ex);
+      reject(ex);
+    }
+  }).then(result => {
+    if (result.ok) {
+      res.json({accountId: result.savedAccountId});
+    } else {
+      switch (result.reason) {
+        default:
+          res.status(401).end();  // unauthorized
       }
-    }).catch(reason => {
-      res.status(500).send('Adding account in database failed');
-    });
-  } else {
-    res.status(404).send('request body must have correct parameters');
-  }
+    }
+  }).catch(reason => {
+    res.status(500).send('Adding account in database failed');
+  });
 });
 
 // ### alter code ###
