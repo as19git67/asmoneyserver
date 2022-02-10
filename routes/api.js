@@ -112,7 +112,8 @@ router.post('/accounts', CORS(), function (req, res, next) {
       //   return;
       // }
       const data = Buffer.from(deviceId);
-      const isVerified = crypto.verify("SHA256", data, deviceInfo.publicKey, req.body.signature);
+      const signature = Buffer.from(req.body.signature);
+      const isVerified = crypto.verify("SHA256", data, deviceInfo.publicKey, signature);
       if (!isVerified) {
         // need to request an device info update from client, which then sends again the private key
         // to be stored in req.app.knownDevices
