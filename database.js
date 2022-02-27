@@ -97,8 +97,9 @@ class DB {
 
     // CREATE TABLES
 
+    let tableName;
     try {
-      let tableName = 'Devices';
+      tableName = 'Devices';
       await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
         t.string('deviceid').unique().notNullable().index();
