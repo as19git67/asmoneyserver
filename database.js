@@ -101,8 +101,7 @@ class DB {
     try {
       tableName = 'Devices';
       await this.knex.schema.createTable(tableName, function (t) {
-        t.increments('id').primary();
-        t.string('deviceid').unique().notNullable().index();
+        t.string('deviceid').primary();
         t.dateTime('registration').notNullable().index();
         t.string('pubkey', 1000).notNullable();
       });
@@ -111,7 +110,7 @@ class DB {
       tableName = 'Accounts';
       await this.knex.schema.createTable(tableName, function (t) {
         t.increments('id').primary();
-        t.integer('deviceid').notNullable().references('id').inTable('Devices').index();
+        t.integer('deviceid').notNullable().references('deviceid').inTable('Devices').index();
         t.string('iban').notNullable().index();
         t.string('contacttype').notNullable();
         t.string('contactbic').notNullable().index();
