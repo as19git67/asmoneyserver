@@ -116,8 +116,8 @@ class DB {
         t.string('contacttype').notNullable();
         t.string('contactbic').notNullable().index();
         t.string('contacturl').notNullable().index();
-        t.string('contactusernameenc', 5000).notNullable();
-        t.string('contactpasswordenc', 5000).notNullable();
+        t.string('contactusernameenc', 4000).notNullable();
+        t.string('contactpasswordenc', 4000).notNullable();
         t.dateTime('creation').notNullable().index();
       });
       console.log("Table " + tableName + " created");
