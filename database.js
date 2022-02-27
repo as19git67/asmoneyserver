@@ -50,7 +50,7 @@ class DB {
         deviceid: deviceId,
         pubkey: publicKey,
         registration: registration.toDate(),
-      }).returning('id');
+      }).returning('deviceid');
 
     const id = result[0];
     return id;
